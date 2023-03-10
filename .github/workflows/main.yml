@@ -1,0 +1,57 @@
+name: x-wrt-build-x86_64
+on: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: ''
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Initialization environment
+      # env:
+      #   DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo apt-get update
+        sudo apt install build-essential ecj fastjar file flex g++ gcc-multilib g++-multilib gawk gettext git git-core java-propose-classpath libelf-dev libncurses5-dev libncursesw5-dev libssl-dev swig python3 python3-distutils subversion unzip wget zlib1g-dev rsync qemu-utils
+        sudo apt-get -y autoremove --purge
+        sudo apt-get clean
+
+    - name: Download source code
+      run: git clone --branch ${{ inputs.tag }} https://github.com/x-wrt/x-wrt.git
+    
+    - name: Add custom packages
+      # luci-app-xray
+      run: git clone https://github.com/yichya/luci-app-xray.git x-wrt/package/extra/luci-app-xray
+
+    - name: Update && Install feeds
+      run: |
+        ./x-wrt/scripts/feeds update -a
+        ./x-wrt/scripts/feeds install -a
+
+    - name: Building
+      run: |
+        cp .config x-wrt/
+        cd x-wrt
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s
+
+    # - name : Upload make.log if failure
+    #   uses: actions/upload-artifact@v3
+    #   if: failure()
+    #   with:
+    #     name: build-failure-log
+    #     path: x-wrt/make.log
+
+    - name : Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: x-wrt-${{ inputs.tag }}_x86_64
+        path: x-wrt/bin/targets
