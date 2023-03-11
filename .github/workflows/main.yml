@@ -54,4 +54,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: x-wrt-${{ inputs.tag }}_x86_64
-        path: x-wrt/bin/targets
+        path: x-wrt/bin/targets/x86/64/*.img.gz
