@@ -1,0 +1,29 @@
+name: X-WRT build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu:22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Get x-wrt source
+        run: |
+          sudo apt install -y build-essential ecj fastjar file flex g++ gcc-multilib g++-multilib gawk gettext git git-core java-propose-classpath libelf-dev libncurses5-dev libncursesw5-dev libssl-dev swig python3 python3-dev python3-distutils python3-pyelftools subversion unzip wget zlib1g-dev rsync qemu-utils
+          wget https://github.com/x-wrt/x-wrt/archive/refs/tags/24.04_b202407151335.tar.gz
+          tar xvf 24.04_b202407151335.tar.gz
+          cd x-wrt-24.04_b202407151335
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          mv ../.config ./
+          sh feeds/x/rom/lede/fix-config.sh
+          make -j1 V=s
+
+      - name : Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: x-wrt-24.04_b202407151335
+          path: x-wrt-24.04_b202407151335/bin/targets/
