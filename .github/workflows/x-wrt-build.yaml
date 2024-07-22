@@ -26,9 +26,12 @@ jobs:
           mv ../.config ./
           sh feeds/x/rom/lede/fix-config.sh
           make -j1 V=s
+          sleep 5s
+          rm -rf ./bin/targets/ramips/mt7621/packages
+          rm -f ./bin/targets/ramips/mt7621/*.tar.zst
 
       - name : Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: x-wrt-${{ github.event.inputs.SOURCE_TAG }}
-          path: x-wrt-${{ github.event.inputs.SOURCE_TAG }}/bin/targets/
+          path: x-wrt-${{ github.event.inputs.SOURCE_TAG }}/bin/targets/ramips/mt7621/
