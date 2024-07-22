@@ -28,6 +28,7 @@ jobs:
           make -j1 V=s
           sleep 5s
           rm -rf ./bin/targets/ramips/mt7621/packages
+          rm -f *-initramfs-kernel.bin
 
       - name : Upload artifact
         uses: actions/upload-artifact@v4
